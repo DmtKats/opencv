@@ -7,38 +7,45 @@
 //  copy or use the software.
 //
 //
-//                           License Agreement
-//                For Open Source Computer Vision Library
+//                            License Agreement
+//                 For Open Source Computer Vision Library
+//                         (3-clause BSD License)
 //
-// Copyright (C) 2000-2008, Intel Corporation, all rights reserved.
-// Copyright (C) 2009, Willow Garage Inc., all rights reserved.
-// Third party copyrights are property of their respective owners.
+//  Copyright (C) 2000-2016, Intel Corporation, all rights reserved.
+//  Copyright (C) 2009-2011, Willow Garage Inc., all rights reserved.
+//  Copyright (C) 2009-2016, NVIDIA Corporation, all rights reserved.
+//  Copyright (C) 2010-2013, Advanced Micro Devices, Inc., all rights reserved.
+//  Copyright (C) 2015-2016, OpenCV Foundation, all rights reserved.
+//  Copyright (C) 2015-2016, Itseez Inc., all rights reserved.
+//  Third party copyrights are property of their respective owners.
 //
-// Redistribution and use in source and binary forms, with or without modification,
-// are permitted provided that the following conditions are met:
+//  Redistribution and use in source and binary forms, with or without modification,
+//  are permitted provided that the following conditions are met:
 //
-//   * Redistribution's of source code must retain the above copyright notice,
-//     this list of conditions and the following disclaimer.
+//    * Redistributions of source code must retain the above copyright notice,
+//      this list of conditions and the following disclaimer.
 //
-//   * Redistribution's in binary form must reproduce the above copyright notice,
-//     this list of conditions and the following disclaimer in the documentation
-//     and/or other materials provided with the distribution.
+//    * Redistributions in binary form must reproduce the above copyright notice,
+//      this list of conditions and the following disclaimer in the documentation
+//      and/or other materials provided with the distribution.
 //
-//   * The name of the copyright holders may not be used to endorse or promote products
-//     derived from this software without specific prior written permission.
+//    * Neither the names of the copyright holders nor the names of the contributors
+//      may be used to endorse or promote products derived from this software
+//      without specific prior written permission.
 //
-// This software is provided by the copyright holders and contributors "as is" and
-// any express or implied warranties, including, but not limited to, the implied
-// warranties of merchantability and fitness for a particular purpose are disclaimed.
-// In no event shall the Intel Corporation or contributors be liable for any direct,
-// indirect, incidental, special, exemplary, or consequential damages
-// (including, but not limited to, procurement of substitute goods or services;
-// loss of use, data, or profits; or business interruption) however caused
-// and on any theory of liability, whether in contract, strict liability,
-// or tort (including negligence or otherwise) arising in any way out of
-// the use of this software, even if advised of the possibility of such damage.
+//  This software is provided by the copyright holders and contributors "as is" and
+//  any express or implied warranties, including, but not limited to, the implied
+//  warranties of merchantability and fitness for a particular purpose are disclaimed.
+//  In no event shall copyright holders or contributors be liable for any direct,
+//  indirect, incidental, special, exemplary, or consequential damages
+//  (including, but not limited to, procurement of substitute goods or services;
+//  loss of use, data, or profits; or business interruption) however caused
+//  and on any theory of liability, whether in contract, strict liability,
+//  or tort (including negligence or otherwise) arising in any way out of
+//  the use of this software, even if advised of the possibility of such damage.
 //
 //M*/
+
 
 #include <cerrno>
 
@@ -77,7 +84,8 @@ const static struct pam_header_field fields[] = {
 };
 #define PAM_FIELDS_NO (sizeof (fields) / sizeof ((fields)[0]))
 
-typedef bool (*cvtFunc) (void *src, void *target, int width, int target_channels, int target_depth);
+typedef bool (*cvtFunc) (void *src, void *target, int width, int target_channels,
+    int target_depth);
 
 struct channel_layout {
     uint rchan, gchan, bchan, graychan;
@@ -94,7 +102,8 @@ struct pam_format {
     struct channel_layout layout;
 };
 
-static bool rgb_convert (void *src, void *target, int width, int target_channels, int target_depth);
+static bool rgb_convert (void *src, void *target, int width, int target_channels,
+    int target_depth);
 
 const static struct pam_format formats[] = {
     {CV_IMWRITE_PAM_FORMAT_NULL, "", NULL, 0, 0, 0, 0},
@@ -117,11 +126,13 @@ rgb_convert (void *src, void *target, int width, int target_channels, int target
     if (target_channels == 3) {
         switch (target_depth) {
             case CV_8U:
-                icvCvt_RGB2BGR_8u_C3R( (uchar*) src, 0, (uchar*) target, 0, cvSize(width,1) );
+                icvCvt_RGB2BGR_8u_C3R( (uchar*) src, 0, (uchar*) target, 0,
+                    cvSize(width,1) );
                 ret = true;
                 break;
             case CV_16U:
-                icvCvt_RGB2BGR_16u_C3R( (ushort *)src, 0, (ushort *)target, 0, cvSize(width,1) );
+                icvCvt_RGB2BGR_16u_C3R( (ushort *)src, 0, (ushort *)target, 0,
+                    cvSize(width,1) );
                 ret = true;
                 break;
             default:
@@ -130,11 +141,13 @@ rgb_convert (void *src, void *target, int width, int target_channels, int target
     } else if (target_channels == 1) {
         switch (target_depth) {
             case CV_8U:
-                icvCvt_BGR2Gray_8u_C3C1R( (uchar*) src, 0, (uchar*) target, 0, cvSize(width,1), 2 );
+                icvCvt_BGR2Gray_8u_C3C1R( (uchar*) src, 0, (uchar*) target, 0,
+                    cvSize(width,1), 2 );
                 ret = true;
                 break;
             case CV_16U:
-                icvCvt_BGRA2Gray_16u_CnC1R( (ushort *)src, 0, (ushort *)target, 0, cvSize(width,1), 3, 2 );
+                icvCvt_BGRA2Gray_16u_CnC1R( (ushort *)src, 0, (ushort *)target, 0,
+                    cvSize(width,1), 3, 2 );
                 ret = true;
                 break;
             default:
@@ -577,9 +590,10 @@ bool  PAMDecoder::readData( Mat& img )
                     else if (fmt) {
                         funcout = false;
                         if (fmt->cvt_func)
-                            funcout = fmt->cvt_func (src, data, m_width, target_channels, img.depth());
-                        /* fall back to default if there is no conversion function or it can't handle the
-                         * specified characteristics
+                            funcout = fmt->cvt_func (src, data, m_width, target_channels,
+                                img.depth());
+                        /* fall back to default if there is no conversion function or it
+                         * can't handle the specified characteristics
                          */
                         if (!funcout)
                             basic_conversion (src, &fmt->layout, m_channels,
