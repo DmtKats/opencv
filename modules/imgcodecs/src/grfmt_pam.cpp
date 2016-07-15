@@ -106,12 +106,12 @@ static bool rgb_convert (void *src, void *target, int width, int target_channels
     int target_depth);
 
 const static struct pam_format formats[] = {
-    {CV_IMWRITE_PAM_FORMAT_NULL, "", NULL, 0, 0, 0, 0},
-    {CV_IMWRITE_PAM_FORMAT_BLACKANDWHITE, "BLACKANDWHITE", NULL, 0, 0, 0, 0},
-    {CV_IMWRITE_PAM_FORMAT_GRAYSCALE, "GRAYSCALE", NULL, 0, 0, 0, 0},
-    {CV_IMWRITE_PAM_FORMAT_GRAYSCALE_ALPHA, "GRAYSCALE_ALPHA", NULL, 0, 0, 0, 0},
-    {CV_IMWRITE_PAM_FORMAT_RGB, "RGB", rgb_convert, 0, 1, 2, 0},
-    {CV_IMWRITE_PAM_FORMAT_RGB_ALPHA, "RGB_ALPHA", NULL, 0, 1, 2, 0},
+    {CV_IMWRITE_PAM_FORMAT_NULL, "", NULL, {0, 0, 0, 0} },
+    {CV_IMWRITE_PAM_FORMAT_BLACKANDWHITE, "BLACKANDWHITE", NULL, {0, 0, 0, 0} },
+    {CV_IMWRITE_PAM_FORMAT_GRAYSCALE, "GRAYSCALE", NULL, {0, 0, 0, 0} },
+    {CV_IMWRITE_PAM_FORMAT_GRAYSCALE_ALPHA, "GRAYSCALE_ALPHA", NULL, {0, 0, 0, 0} },
+    {CV_IMWRITE_PAM_FORMAT_RGB, "RGB", rgb_convert, {0, 1, 2, 0} },
+    {CV_IMWRITE_PAM_FORMAT_RGB_ALPHA, "RGB_ALPHA", NULL, {0, 1, 2, 0} },
 };
 #define PAM_FORMATS_NO (sizeof (fields) / sizeof ((fields)[0]))
 
@@ -245,7 +245,7 @@ static bool ReadPAMHeaderLine (cv::RLByteStream& strm,
     memset (ident, '\0', sizeof(char) * MAX_PAM_HEADER_IDENITFIER_LENGTH);
     for (i=0; i<MAX_PAM_HEADER_IDENITFIER_LENGTH; i++) {
         if (!isspace(code))
-            ident[i] = code;
+            ident[i] = (char) code;
         else
             break;
         code = strm.getByte();
@@ -279,7 +279,7 @@ static bool ReadPAMHeaderLine (cv::RLByteStream& strm,
     /* read identifier value */
     for (i=0; i<MAX_PAM_HEADER_VALUE_LENGTH; i++) {
         if (code != '\n' && code != '\r') {
-            value[i] = code;
+            value[i] = (char) code;
         } else if (code != '\n' || code != '\r')
             break;
         code = strm.getByte();
@@ -310,7 +310,7 @@ static bool ParseNumber (char *str, int *retval)
     return false;
   }
 
-  *retval = lval;
+  *retval = (int) lval;
 
   return true;
 }
@@ -360,7 +360,7 @@ struct parsed_fields
 
 bool  PAMDecoder::readHeader()
 {
-    PamHeaderFieldType fieldtype;
+    PamHeaderFieldType fieldtype = PAM_HEADER_NONE;
     char value[MAX_PAM_HEADER_VALUE_LENGTH+1];
     int byte;
     struct parsed_fields flds;
