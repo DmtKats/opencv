@@ -656,7 +656,7 @@ bool PAMEncoder::write( const Mat& img, const std::vector<int>& params )
 
     /* parse save file type */
     for( size_t i = 0; i < params.size(); i += 2 )
-        if( params[i] == CV_IMWRITE_PXM_BINARY ) {
+        if( params[i] == CV_IMWRITE_PAM_TUPLETYPE ) {
             if ( params[i+1] > CV_IMWRITE_PAM_FORMAT_NULL &&
                  params[i+1] < (int) PAM_FORMATS_NO)
                 fmt = &formats[params[i+1]];
